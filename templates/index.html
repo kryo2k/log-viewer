@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block title %}{{page_title}}{% endblock title %}
+{% block header %}
+<div class="page-header pb-2">
+	<h1 class="display-3">{{page_title}}</h1>
+	<div class="signal float-end">
+		<div id="signal-color" class="signal-color"></div>
+		<div id="signal-text" class="signal-text"></div>
+	</div>
+	<div>Watching: <code>{{fwthread.path}}</code></div>
+	<div class="clearfix"></div>
+</div>
+{% endblock header %}
+{% block headtag %}
+<script src="/static/socket.io-4.8.1.min.js"></script>
+<style>
+.signal {
+	display: flex;
+	align-items: center;
+	justify-content: stretch;
+	font-size: 12px;
+}
+.signal-color {
+	width: 1em;
+	height: 1em;
+	border: 1px solid black;
+	background-color: silver;
+}
+.signal-color.signal-bad {
+	background-color: red;
+	border-color: pink;
+}
+.signal-color.signal-warn {
+	background-color: orange;
+	border-color: darkorange;
+}
+.signal-color.signal-okay {
+	background-color: green;
+	border-color: darkgreen;
+}
+.signal-text {
+	padding: 0 0.5em;
+}
+.signal-text.signal-bad {}
+.signal-text.signal-warn {}
+.signal-text.signal-okay {}
+</style>
+{% endblock headtag %}
+{% block content %}
+<div class="row flex-grow-1">
+	<div class="col border" style="position:relative">
+		<div id="existing-file-content" class="d-none overflow-y-scroll p-3 small" style="font-family:monospace;position:absolute;left:0;right:0;bottom:0;top:0"></div>
+		<div id="missing-file-content" class="d-none m-4 mt-3 mb-3">
+			<div class="alert alert-warning text-center">Path does not exist, or cannot be read.</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+(function() {
+	if(!window.io)
+		throw new Exception('Socket.IO is not loaded.');
+
+	const
+	MAXBUFFERSIZE = {{maxBufferSize|tojson}},
+	SIGNAL_BAD = Symbol(),
+	SIGNAL_WARN = Symbol(),
+	SIGNAL_OKAY = Symbol();
+
+	function elExistingFileContent() {
+		return document.getElementById('existing-file-content')
+	}
+	function elMissingFileContent() {
+		return document.getElementById('missing-file-content')
+	}
+	function elSignalColor() {
+		return document.getElementById('signal-color');
+	}
+	function elSignalText() {
+		return document.getElementById('signal-text');
+	}
+	function updateSignal(signal) {
+		const
+		cnBad = 'signal-bad',
+		cnWarn = 'signal-warn',
+		cnOkay = 'signal-okay',
+		elColorCL = elSignalColor().classList,
+		elText = elSignalText();
+		if(signal === SIGNAL_BAD) {
+			elColorCL.add(cnBad);
+			elColorCL.remove(cnWarn);
+			elColorCL.remove(cnOkay);
+			elText.innerText = 'Disconnected';
+		}
+		else if(signal === SIGNAL_WARN) {
+			elColorCL.remove(cnBad);
+			elColorCL.add(cnWarn);
+			elColorCL.remove(cnOkay);
+			elText.innerText = 'Unstable Connection';
+		}
+		else if(signal === SIGNAL_OKAY) {
+			elColorCL.remove(cnBad);
+			elColorCL.remove(cnWarn);
+			elColorCL.add(cnOkay);
+			elText.innerText = 'Connected';
+		}
+	}
+	function scrollBottomContent() {
+		const el = elExistingFileContent();
+		el.scrollTop = el.scrollHeight;
+	}
+	function truncateContentText() {
+		const
+		fcEl = elExistingFileContent(),
+		txt = fcEl.innerText,
+		diff = txt.length - MAXBUFFERSIZE;
+		if(diff > 0) fcEl.innerText = txt.slice(diff);
+	}
+	function replaceContent(content) {
+		elExistingFileContent().innerText = content;
+		truncateContentText();
+		scrollBottomContent();
+	}
+	function appendContent(content) {
+		elExistingFileContent().innerText += content;
+		truncateContentText();
+		scrollBottomContent();
+	}
+	function switchModeExisting() {
+		const elA = elExistingFileContent(), elB = elMissingFileContent();
+		elA.classList.remove('d-none')
+		elB.classList.add('d-none')
+	}
+	function switchModeMissing() {
+		const elA = elExistingFileContent(), elB = elMissingFileContent();
+		elB.classList.remove('d-none')
+		elA.classList.add('d-none')
+	}
+	function onSocketDisconnection(socket) {
+		updateSignal(SIGNAL_WARN);
+	}
+	function onSocketConnection(socket) {
+		updateSignal(SIGNAL_OKAY);
+	}
+	function initialize() {
+		updateSignal(SIGNAL_BAD);
+		const socket = io();
+		socket.on('connect', () => onSocketConnection(socket))
+			.on('disconnect', () => onSocketDisconnection(socket))
+			.on('switchMissing', switchModeMissing)
+			.on('switchExisting', switchModeExisting)
+			.on('replaceContent', replaceContent)
+			.on('appendContent', appendContent);
+{% if fwthread.pathExists %}
+		switchModeExisting();
+{% else %}
+		switchModeMissing();
+{% endif %}
+	}
+	window.addEventListener('load', initialize);
+}).call(this);
+</script>
+{% endblock content %}
