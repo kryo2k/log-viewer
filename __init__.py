@@ -1,14 +1,13 @@
 """Main entry point module for flask."""
-
 import os
 from datetime import date, time, datetime
 from flask import Flask, request
 from babel.dates import format_date, format_datetime, format_time
 from babel.numbers import format_number, format_decimal, format_percent
 
-from . import blueprints
-from .extensions import auth, socketio
-from .config import timezone, locale
+from app import blueprints
+from app.extensions import auth, socketio
+from app.config import timezone, locale
 
 app = Flask(__name__)
 blueprints.init_app(app)

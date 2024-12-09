@@ -1,0 +1,20 @@
+#!/bin/sh
+
+APP_PATH=/path/to/log-viewer
+APP_HOST=localhost
+APP_PORT=3000
+
+export AUTH_ENABLED=1
+export AUTH_FILE="$HOME/.log-viewer-auth"
+export INDEX_TITLE="Demo Log File (debug)"
+export LOCALE="en_US"
+export TIMEZONE="US/Eastern"
+export FILE_PATH="/path/to/my-special-file.log"
+export PYTHONPATH="./lib:$PYTHONPATH"
+
+. $APP_PATH/venv/bin/activate
+
+flask --app $APP_PATH run \
+ -h $APP_HOST \
+ -p $APP_PORT \
+ --debug

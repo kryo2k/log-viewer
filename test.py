@@ -1,12 +1,14 @@
 """Main entrypoint for launching project unit tests."""
-
 import unittest
-from lib import authfile, eventmanager, filewatch
+
+from app.classes import authfile, eventmanager, fileaccess, filewatchthread, filetailthread
 
 test_modules = [
 	authfile,
 	eventmanager,
-	filewatch
+	fileaccess,
+	filewatchthread,
+	filetailthread
 ]
 
 def suite():

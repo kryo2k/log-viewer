@@ -13,7 +13,7 @@ lint:
 	./venv/bin/pylint --rcfile .pylintrc $(shell git ls-files '*.py')
 
 test:
-	./venv/bin/python test.py
+	PYTHONPATH="./lib" ./venv/bin/python test.py
 
 clean_cache:
 	find . -type d -name __pycache__ -exec rm -r {} \+

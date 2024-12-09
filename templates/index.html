@@ -7,7 +7,7 @@
 		<div id="signal-color" class="signal-color"></div>
 		<div id="signal-text" class="signal-text"></div>
 	</div>
-	<div>Watching: <code>{{fwthread.path}}</code></div>
+	<div>Watching: <code>{{thread.path}}</code></div>
 	<div class="clearfix"></div>
 </div>
 {% endblock header %}
@@ -61,7 +61,7 @@
 		throw new Exception('Socket.IO is not loaded.');
 
 	const
-	MAXBUFFERSIZE = {{maxBufferSize|tojson}},
+	MAXBUFFERSIZE = {{thread.maxTailSize|tojson}},
 	SIGNAL_BAD = Symbol(),
 	SIGNAL_WARN = Symbol(),
 	SIGNAL_OKAY = Symbol();
@@ -150,7 +150,7 @@
 			.on('switchExisting', switchModeExisting)
 			.on('replaceContent', replaceContent)
 			.on('appendContent', appendContent);
-{% if fwthread.pathExists %}
+{% if thread.fileAccess.exists %}
 		switchModeExisting();
 {% else %}
 		switchModeMissing();

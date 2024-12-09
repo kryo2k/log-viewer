@@ -1,7 +1,7 @@
 """Blueprint initializer module. Loads all active blueprint modules."""
 
 from flask import Blueprint, request, send_file
-from . import index
+from app.blueprints import index
 bp = Blueprint("app", __name__)
 
 @bp.route("/favicon.png", methods=['GET'])

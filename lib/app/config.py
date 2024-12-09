@@ -3,7 +3,8 @@ import os
 import sys
 from babel import Locale
 from pytz import timezone as loadtimezone
-from .lib.authfile import AuthFile
+
+from app.classes.authfile import AuthFile
 
 locale = Locale.parse(os.getenv('LOCALE','en_US'))
 timezone = loadtimezone(os.getenv('TIMEZONE','US/Eastern'))

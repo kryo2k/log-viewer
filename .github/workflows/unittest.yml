@@ -20,4 +20,4 @@ jobs:
         pip install -Ur requirements.txt
     - name: Running unit tests
       run: |
-        python test.py
+        PYTHONPATH="./lib" python test.py

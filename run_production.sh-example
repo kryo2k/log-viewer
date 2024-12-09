@@ -1,0 +1,23 @@
+#!/bin/sh
+
+CH_DIR=/path/to
+APP_DIR=log-viewer
+APP_HOST=localhost
+APP_PORT=3000
+
+export AUTH_ENABLED=1
+export AUTH_FILE="$HOME/.log-viewer-auth"
+export INDEX_TITLE="Demo Log File (production)"
+export LOCALE="en_US"
+export TIMEZONE="US/Eastern"
+export FILE_PATH="/path/to/my-special-file.log"
+export PYTHONPATH="./lib:$PYTHONPATH"
+
+. $CH_DIR/$APP_DIR/venv/bin/activate
+
+gunicorn \
+ --worker-class eventlet \
+ --chdir $CH_DIR \
+ -w 1 \
+ -b $APP_HOST:$APP_PORT \
+ $APP_DIR:app

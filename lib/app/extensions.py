@@ -1,17 +1,16 @@
 """All extensions required for application functionality."""
 
-import os
 from flask import render_template
 from flask_httpauth import HTTPBasicAuth
 from flask_socketio import SocketIO
 
-from .config import auth_file, auth_enabled, watch_file_name
-from .lib.filewatch import FileWatchThread
+from app.config import auth_file, auth_enabled, watch_file_name
+from app.classes.filetailthread import FileTailThread
 
 auth = HTTPBasicAuth()
 socketio = SocketIO(cors_allowed_origins='*')
-fwthread = FileWatchThread(watch_file_name)
-fwthread.start()
+ftthread = FileTailThread(watch_file_name)
+ftthread.start()
 
 @auth.verify_password
 def verify_password(username, password):
